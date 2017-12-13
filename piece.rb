@@ -1,13 +1,22 @@
 require 'singleton'
 
+
+
 class Piece
-  attr_reader :symbol
-  def initialize(pos, board)
+  attr_reader :symbol, :pos, :board, :color
+  def initialize(pos,board,color)
       @pos = pos
       @board = board
       @moves = []
       @symbol = nil
   end
+
+  def update_pos(pos)
+    @pos = pos
+    @moves = self.moves
+  end
+
+
 
   def moves
   end
@@ -22,94 +31,265 @@ class Piece
     "piece"
   end
 
-
-
   def move_into_check(to_pos)
   end
 
   module SlidingPiece
     def moves
       start_row,start_col = pos
+      moves_array = []
       if symbol == :rook || symbol == :queen
-        (0..7).each do |idx|
-          moves << [start_row,idx] unless idx == start_col
-          moves << [idx,start_col] unless idx == start_row
+
+
+        # upwards row decreases, column stays the same
+        row, col = start_row - 1, start_col
+        until row < 0
+          if board[[row,col]].symbol != :null
+            if board[[row,col]].color != color
+              moves_array << [row, col]
+            else
+              break
+            end
+          end
+          moves_array << [row,col]
+          row -= 1
         end
-      else
-        row, col= start_row + 1, start_col + 1
+        # downwards row increases, column stays the same
+        row, col = start_row + 1, start_col
+        until row > 7
+          if board[[row,col]].symbol != :null
+            if board[[row,col]].color != color
+              moves_array << [row, col]
+            else
+              break
+            end
+          end
+          moves_array << [row,col]
+          row += 1
+        end
+        # left row stays the same, column decreases
+        row, col = start_row, start_col - 1
+        until col < 0
+          if board[[row,col]].symbol != :null
+            if board[[row,col]].color != color
+              moves_array << [row, col]
+            else
+              break
+            end
+          end
+          moves_array << [row,col]
+          col -= 1
+        end
+        # right row stays the same, column increases
+        row, col = start_row, start_col + 1
+        until col > 7
+          if board[[row,col]].symbol != :null
+            if board[[row,col]].color != color
+              moves_array << [row, col]
+            else
+              break
+            end
+          end
+          moves_array << [row,col]
+          col += 1
+        end
+      end
+      if symbol == :queen || symbol == :bishop
+        row, col = start_row + 1, start_col + 1
         until row > 7 || col > 7
-          break if board[row,col].symbol != :null
-          moves << [row,col]
+          if board[[row,col]].symbol != :null
+            if board[[row,col]].color != color
+              moves_array << [row, col]
+            else
+              break
+            end
+          end
+          moves_array << [row,col]
           row,col = row + 1, col + 1
         end
-        row, col= start_row - 1, start_col - 1
+        row, col = start_row - 1, start_col - 1
         until row < 0 || col < 0
-          break if board[row,col].symbol != :null
-          moves << [row,col]
+          if board[[row,col]].symbol != :null
+            if board[[row,col]].color != color
+              moves_array << [row, col]
+            else
+              break
+            end
+          end
+          moves_array << [row,col]
           row,col = row - 1, col - 1
         end
-        row, col= start_row + 1, start_col - 1
+        row, col = start_row + 1, start_col - 1
         until row > 7 || col < 0
-          break if board[row,col].symbol != :null
-          moves << [row,col]
+          if board[[row,col]].symbol != :null
+            if board[[row,col]].color != color
+              moves_array << [row, col]
+            else
+              break
+            end
+          end
+          moves_array << [row,col]
           row,col = row + 1, col - 1
         end
-        row, col= start_row - 1, start_col + 1
+        row, col = start_row - 1, start_col + 1
         until row < 0 || col > 7
-          break if board[row,col].symbol != :null
-          moves << [row,col]
+          if board[[row,col]].symbol != :null
+            if board[[row,col]].color != color
+              moves_array << [row, col]
+            else
+              break
+            end
+          end
+          moves_array << [row,col]
           row,col = row - 1, col + 1
         end
       end
+      p moves_array
+      @moves = moves_array
     end
   end
 
   module SteppingPiece
     def moves
+      moves_array = []
       start_row, start_col = pos
+
+      move_proc = Proc.new do |offset|
+        row = start_row + offset[0]
+        col = start_col + offset[1]
+        moves_array << [row,col] unless !board.in_bounds?([row,col]) || board[[row, col]].color == color
+      end
       if symbol == :knight
-        moves << [start_row + 2, col + 1] unless board[start_row + 2, col + 1] != :null
-        moves << [start_row - 2, col - 1] unless board[start_row - 2, col - 1] != :null
-        moves << [start_row + 2, col - 1] unless board[start_row + 2, col - 1] != :null
-        moves << [start_row - 2, col + 1] unless board[start_row - 2, col + 1] != :null
-        moves << [start_row + 1, col + 2] unless board[start_row + 1, col + 2] != :null
-        moves << [start_row - 1, col - 2] unless board[start_row - 1, col - 2] != :null
-        moves << [start_row + 1, col - 2] unless board[start_row + 1, col - 2] != :null
-        moves << [start_row - 1, col + 2] unless board[start_row - 1, col + 2] != :null
+        offsets = [
+          [2, 1],
+          [-2, -1],
+          [2, -1],
+          [-2, 1],
+          [1, 2],
+          [-1, -2],
+          [1, -2],
+          [-1, 2]
+        ]
+        moves_array.concat(offsets.map(&move_proc))
       elsif symbol == :king
-        moves << [start_row + 1, col + 1] unless board[start_row + 1, col + 1] != :null
-        moves << [start_row + 1, col + 1] unless board[start_row + 1, col + 1] != :null
-        moves << [start_row + 1, col - 1] unless board[start_row + 1, col - 1] != :null
-        moves << [start_row - 1, col + 1] unless board[start_row - 1, col + 1] != :null
-        moves << [start_row, col + 1] unless board[start_row, col + 1] != :null
-        moves << [start_row, col - 1] unless board[start_row, col - 1] != :null
-        moves << [start_row + 1, col] unless board[start_row + 1, col] != :null
-        moves << [start_row - 1, col] unless board[start_row - 1, col] != :null
+        offsets = [
+          [1, 1],
+          [-1, -1],
+          [1, -1],
+          [-1, 1],
+          [1, 0],
+          [0, 1],
+          [-1, 0],
+          [0, -1]
+        ]
+        offsets.each(&move_proc)
       elsif symbol == :pawn
         start_row, start_col = pos
         if color == :white
-          if in_start_row?
-            moves << [start_row + 2, col] unless board[start_row + 2, col] != :null
+          # diagonal squares are col -1, col + 1, row -1
+          if !board[[start_row - 1, start_col + 1]].nil? && board[[start_row - 1, start_col + 1]].color != color
+            moves_array << [start_row - 1, start_col + 1]
           end
-          moves << [start_row + 1, col] unless board[start_row + 1, col] != :null
+          if !board[[start_row - 1, start_col - 1]].nil? && board[[start_row - 1, start_col - 1]].color != color
+              moves_array << [start_row - 1, start_col - 1]
+          end
+          if start_row == 6
+            row = start_row - 2
+            col = start_col
+            moves_array << [row, col] unless !board.in_bounds?([row,col]) ||
+                board[[row, col]].color == color
+          end
+          col = start_col
+          row = start_row - 1
+          moves_array << [row, col] unless !board.in_bounds?([row,col]) ||
+            board[[row, col]].color == color
         else
-          if in_start_row?
-            moves << [start_row - 2, col] unless board[start_row - 2, col] != :null
+          if !board[[start_row + 1, start_col + 1]].nil? && board[[start_row + 1, start_col + 1]].color != color
+            moves_array << [start_row + 1, start_col + 1]
           end
-          moves << [start_row - 1, col] unless board[start_row - 1, col] != :null
+          if !board[[start_row + 1, start_col - 1]].nil? && board[[start_row + 1, start_col - 1]].color != color
+              moves_array << [start_row + 1, start_col - 1]
+          end
+          if start_row == 1
+            row = start_row + 2
+            col = start_col
+            moves_array << [row, col] unless !board.in_bounds?([row,col]) ||
+              board[[row, col]].color == color
+          end
+          col = start_col
+          row = start_row + 1
+          moves_array << [row, col] unless !board.in_bounds?([row,col]) ||
+            board[[row, col]].color == color
         end
+        p moves_array
+        @at_start_row = false
       end
+      @moves = moves_array
+
+
     end
   end
 
 end
 
+class Rook < Piece
+  include SlidingPiece
+
+  def initialize(pos,board,color)
+    super
+    @symbol = :rook
+    @color = color
+  end
+end
+
+class Queen < Piece
+  include SlidingPiece
+
+  def initialize(pos,board,color)
+    super
+    @symbol = :queen
+    @color = color
+  end
+end
+
+class Bishop < Piece
+  include SlidingPiece
+
+  def initialize(pos,board,color)
+    super
+    @symbol = :bishop
+    @color = color
+  end
+end
+
 class King < Piece
   include SteppingPiece
 
-  def initialize(pos,board)
+  def initialize(pos,board,color)
     super
     @symbol = :king
+    @color = color
+  end
+end
+
+class Knight < Piece
+  include SteppingPiece
+
+  def initialize(pos,board,color)
+    super
+    @symbol = :knight
+    @color=color
+
+  end
+end
+
+class Pawn < Piece
+  include SteppingPiece
+
+  def initialize(pos,board,color)
+    super
+    @symbol = :pawn
+    @color=color
   end
 end
 
@@ -119,7 +299,7 @@ class NullPiece < Piece
   attr_reader :color, :moves
 
   def initialize
-    @color = :grey
+    @color = :null
     @symbol = :null
   end
 end

@@ -106,16 +106,16 @@ class Cursor
       nil
     when :space
       # p board.destination_square
-      return @board.destination_square = cursor_pos if @board.start_square
-      return @board.start_square = cursor_pos if @board.start_square == nil
+      return @board.destination_square = cursor_pos.dup unless @board.start_square.nil? || cursor_pos == @board.start_square
+      return @board.start_square = cursor_pos.dup if @board.start_square == nil && board[cursor_pos].symbol != :null
       return @board.start_square = nil if cursor_pos == @board.start_square
       # p @board.destination_square
     when :backspace
     when :tab
     when :return
-      @board.destination_square = cursor_pos if @board.start_square
-      @board.start_square = cursor_pos if @board.start_square == nil
-      @board.start_square = nil if cursor_pos == @board.start_square
+      @board.destination_square = cursor_pos.dup
+      # @board.start_square = cursor_pos if @board.start_square == nil
+      # @board.start_square = nil if cursor_pos == @board.start_square
 
     when :newline
     when :escape
