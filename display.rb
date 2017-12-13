@@ -100,11 +100,19 @@ class Display
   def test_display
     until false
       system("clear")
-      # if board.in_check?(:black) || board.in_check?(:white)
-      #   puts"check!"
-      # end
+
       if board.start_square && board.destination_square
-        board.move_piece(board.start_square, board.destination_square)
+        begin
+          board.move_piece(board.start_square, board.destination_square)
+          if board.in_check?(:black) || board.in_check?(:white)
+            puts"check!"
+            # break
+          end
+        rescue InvalidMoveError => e
+          puts e.message
+          @board.start_square = nil
+          @board.destination_square = nil
+        end
       end
       self.render
       @cursor.get_input

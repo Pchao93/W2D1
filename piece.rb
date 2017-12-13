@@ -16,7 +16,21 @@ class Piece
     @moves = self.moves
   end
 
-
+  def valid_moves
+    dup_board = board.dup
+    valid_moves_array = []
+    @moves.each do |pos|
+      old_thing_at_new_spot = dup_board[pos]
+      dup_board.move_piece!(piece.pos, pos)
+      if !in_check(color)
+        valid_moves_array << pos
+        dup_board.move_piece!(pos, piece.pos)
+        dup_board[pos] = old_thing_at_new_spot
+      else
+        next
+      end
+    end
+  end
 
   def moves
   end
@@ -47,6 +61,7 @@ class Piece
           if board[[row,col]].symbol != :null
             if board[[row,col]].color != color
               moves_array << [row, col]
+              break
             else
               break
             end
@@ -60,6 +75,7 @@ class Piece
           if board[[row,col]].symbol != :null
             if board[[row,col]].color != color
               moves_array << [row, col]
+              break
             else
               break
             end
@@ -73,6 +89,7 @@ class Piece
           if board[[row,col]].symbol != :null
             if board[[row,col]].color != color
               moves_array << [row, col]
+              break
             else
               break
             end
@@ -86,6 +103,7 @@ class Piece
           if board[[row,col]].symbol != :null
             if board[[row,col]].color != color
               moves_array << [row, col]
+              break
             else
               break
             end
@@ -100,6 +118,7 @@ class Piece
           if board[[row,col]].symbol != :null
             if board[[row,col]].color != color
               moves_array << [row, col]
+              break
             else
               break
             end
@@ -112,6 +131,7 @@ class Piece
           if board[[row,col]].symbol != :null
             if board[[row,col]].color != color
               moves_array << [row, col]
+              break
             else
               break
             end
@@ -124,6 +144,7 @@ class Piece
           if board[[row,col]].symbol != :null
             if board[[row,col]].color != color
               moves_array << [row, col]
+              break
             else
               break
             end
@@ -136,6 +157,7 @@ class Piece
           if board[[row,col]].symbol != :null
             if board[[row,col]].color != color
               moves_array << [row, col]
+              break
             else
               break
             end
@@ -144,7 +166,7 @@ class Piece
           row,col = row - 1, col + 1
         end
       end
-      p moves_array
+      # p moves_array
       @moves = moves_array
     end
   end
@@ -187,11 +209,16 @@ class Piece
         start_row, start_col = pos
         if color == :white
           # diagonal squares are col -1, col + 1, row -1
-          if !board[[start_row - 1, start_col + 1]].nil? && board[[start_row - 1, start_col + 1]].color != color
+          if !board[[start_row - 1, start_col + 1]].nil? &&
+              board[[start_row - 1, start_col + 1]].symbol != :null &&
+                board[[start_row - 1, start_col + 1]].color != color
+
             moves_array << [start_row - 1, start_col + 1]
           end
-          if !board[[start_row - 1, start_col - 1]].nil? && board[[start_row - 1, start_col - 1]].color != color
-              moves_array << [start_row - 1, start_col - 1]
+          if !board[[start_row - 1, start_col - 1]].nil? &&
+              board[[start_row - 1, start_col - 1]].symbol != :null &&
+                board[[start_row - 1, start_col - 1]].color != color
+            moves_array << [start_row - 1, start_col - 1]
           end
           if start_row == 6
             row = start_row - 2
@@ -202,12 +229,16 @@ class Piece
           col = start_col
           row = start_row - 1
           moves_array << [row, col] unless !board.in_bounds?([row,col]) ||
-            board[[row, col]].color == color
+            board[[row, col]] != NullPiece.instance
         else
-          if !board[[start_row + 1, start_col + 1]].nil? && board[[start_row + 1, start_col + 1]].color != color
+          if !board[[start_row + 1, start_col + 1]].nil? &&
+              board[[start_row + 1, start_col + 1]].symbol != :null &&
+                board[[start_row + 1, start_col + 1]].color != color
             moves_array << [start_row + 1, start_col + 1]
           end
-          if !board[[start_row + 1, start_col - 1]].nil? && board[[start_row + 1, start_col - 1]].color != color
+          if !board[[start_row + 1, start_col - 1]].nil? &&
+              board[[start_row + 1, start_col - 1]].symbol != :null &&
+                board[[start_row + 1, start_col - 1]].color != color
               moves_array << [start_row + 1, start_col - 1]
           end
           if start_row == 1
@@ -219,10 +250,8 @@ class Piece
           col = start_col
           row = start_row + 1
           moves_array << [row, col] unless !board.in_bounds?([row,col]) ||
-            board[[row, col]].color == color
+            board[[row, col]] != NullPiece.instance
         end
-        p moves_array
-        @at_start_row = false
       end
       @moves = moves_array
 
