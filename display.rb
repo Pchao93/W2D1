@@ -104,12 +104,13 @@ class Display
       if board.start_square && board.destination_square
         begin
           board.move_piece(board.start_square, board.destination_square)
-          # if board.in_check?(:black) || board.in_check?(:white)
-          #   puts"check!"
+          if board.in_check?(:black) || board.in_check?(:white)
+            puts"check!"
           #   # if board.checkmate?(:black) || board.checkmate?(:white)
           #   #   puts "checkmate bitches"
           #   # end
-          # end
+            break
+          end
         rescue InvalidMoveError => e
           puts e.message
           @board.start_square = nil
