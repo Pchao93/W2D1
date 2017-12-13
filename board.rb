@@ -218,16 +218,16 @@ class Board
   #
   # end
 
-  def checkmate?(color)
-    if in_check?(color)
-      valid_moves = []
-      self.each_piece do |piece|
-        valid_moves = piece.valid_moves
-      end
-      return valid_moves.empty?
-    end
-    false
-  end
+  # def checkmate?(color)
+  #   if in_check?(color)
+  #     valid_moves = []
+  #     self.each_piece do |piece|
+  #       valid_moves = piece.valid_moves
+  #     end
+  #     return valid_moves.empty?
+  #   end
+  #   false
+  # end
 
 
 end
