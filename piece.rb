@@ -16,22 +16,6 @@ class Piece
     @moves = self.moves
   end
 
-  def valid_moves
-    dup_board = board.dup
-    valid_moves_array = []
-    @moves.each do |pos|
-      old_thing_at_new_spot = dup_board[pos]
-      dup_board.move_piece!(piece.pos, pos)
-      if !in_check(color)
-        valid_moves_array << pos
-        dup_board.move_piece!(pos, piece.pos)
-        dup_board[pos] = old_thing_at_new_spot
-      else
-        next
-      end
-    end
-  end
-
   def moves
   end
 
@@ -257,6 +241,43 @@ class Piece
 
 
     end
+  end
+
+  def valid_moves
+    # p "blarglefargle"
+    dup_board = board.dup
+    # p dup_board
+    valid_moves_array = []
+
+    i = 0
+    while i < @moves.compact.length
+      if @moves[i].nil?
+        i += 1
+        next
+      end
+      old_thing_at_new_spot = dup_board[@moves[i]]
+
+      dup_board.move_piece!(self.pos, @moves[i])
+      if !dup_board.in_check?(color)
+
+        valid_moves_array << @moves[i]
+
+        dup_board.move_piece!(@moves[i], self.pos)
+
+        dup_board[@moves[i]] = old_thing_at_new_spot
+        self.update_pos(self.pos)
+
+
+
+      else
+
+      end
+      i += 1
+    end
+
+    # p "BLARGEESDF"
+    return valid_moves_array
+
   end
 
 end

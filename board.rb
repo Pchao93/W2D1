@@ -77,11 +77,12 @@ class Board
     raise InvalidMoveError, "no piece at start" if self[start_pos].nil? #instead, check for null piece
     raise InvalidMoveError unless in_bounds?(end_pos)
     piece = self[start_pos]
-    # self.each_piece do |p|
-    #   p.update_pos(p.pos)
-    # end
+    self.each_piece do |p|
+      p.update_pos(p.pos)
+    end
+    p piece.valid_moves.nil?
 
-    if piece.moves.include?(end_pos)
+    if piece.valid_moves.include?(end_pos)
 
       # p [self[end_pos], self[start_pos]]
       self[end_pos] = piece
@@ -91,47 +92,29 @@ class Board
     # p [self[end_pos], self[start_pos]]
     end
     piece.update_pos(end_pos)
-    # self.each_piece do |p|
-    #   p.update_pos(p.pos)
-    # end
+    self.each_piece do |p|
+      p.update_pos(p.pos)
+    end
 
     @start_square = nil
     @destination_square = nil
   end
 
-  # def move_piece!(start_pos, end_pos)
-  #
-  #   raise InvalidMoveError, "no piece at start" if self[start_pos].nil? #instead, check for null piece
-  #   raise InvalidMoveError unless in_bounds?(end_pos)
-  #   piece = self[start_pos]
-  #   # self.each_piece do |p|
-  #   #   p.update_pos(p.pos)
-  #   # end
-  #
-  #   if piece.moves.include?(end_pos)
-  #
-  #     # p [self[end_pos], self[start_pos]]
-  #     self[end_pos] = piece
-  #     self[start_pos] = NullPiece.instance
-  #   else
-  #     raise InvalidMoveError, "not a valid move"
-  #   # p [self[end_pos], self[start_pos]]
-  #   end
-  #   piece.update_pos(end_pos)
-  #   # self.each_piece do |p|
-  #   #   p.update_pos(p.pos)
-  #   # end
-  #
-  #   @start_square = nil
-  #   @destination_square = nil
-  # end
+  def move_piece!(start_pos, end_pos)
+    piece = self[start_pos]
+
+
+    self[end_pos] = piece
+    self[start_pos] = NullPiece.instance
+
+  end
 
   def [](pos)
     row, col = pos
     if row < 0 || col < 0
       return nil
-    elsif row > 7 || col > 7
-      return nil
+    # elsif row > 7 || col > 7
+    #   return nil
     end
 
     @grid[row][col]
@@ -191,43 +174,43 @@ class Board
     return total_possible_moves.include?(king_position)
   end
 
-  # def dup
-  #   dup_board = Board.new(Board.empty_grid)
-  #
-  #   self.each_piece do |piece|
-  #     case piece.symbol
-  #     when :null
-  #       next
-  #     when :king
-  #       dup_piece = King.new(piece.pos, dup_board, piece.color)
-  #     when :queen
-  #       dup_piece = Queen.new(piece.pos, dup_board, piece.color)
-  #     when :bishop
-  #       dup_piece = Bishop.new(piece.pos, dup_board, piece.color)
-  #     when :knight
-  #       dup_piece = Knight.new(piece.pos, dup_board, piece.color)
-  #     when :rook
-  #       dup_piece = Rook.new(piece.pos, dup_board, piece.color)
-  #     when :pawn
-  #       dup_piece = Pawn.new(piece.pos, dup_board, piece.color)
-  #     end
-  #     dup_board[piece.pos] = dup_piece
-  #   end
-  #
-  #   dup_board
-  #
-  # end
+  def dup
+    dup_board = Board.new(Board.empty_grid)
 
-  # def checkmate?(color)
-  #   if in_check?(color)
-  #     valid_moves = []
-  #     self.each_piece do |piece|
-  #       valid_moves = piece.valid_moves
-  #     end
-  #     return valid_moves.empty?
-  #   end
-  #   false
-  # end
+    self.each_piece do |piece|
+      case piece.symbol
+      when :null
+        next
+      when :king
+        dup_piece = King.new(piece.pos, dup_board, piece.color)
+      when :queen
+        dup_piece = Queen.new(piece.pos, dup_board, piece.color)
+      when :bishop
+        dup_piece = Bishop.new(piece.pos, dup_board, piece.color)
+      when :knight
+        dup_piece = Knight.new(piece.pos, dup_board, piece.color)
+      when :rook
+        dup_piece = Rook.new(piece.pos, dup_board, piece.color)
+      when :pawn
+        dup_piece = Pawn.new(piece.pos, dup_board, piece.color)
+      end
+      dup_board[piece.pos] = dup_piece
+    end
+
+    dup_board
+
+  end
+
+  def checkmate?(color)
+    if in_check?(color)
+      valid_moves = []
+      self.each_piece do |piece|
+        valid_moves = piece.valid_moves
+      end
+      return valid_moves.empty?
+    end
+    false
+  end
 
 
 end

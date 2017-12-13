@@ -106,7 +106,9 @@ class Display
           board.move_piece(board.start_square, board.destination_square)
           if board.in_check?(:black) || board.in_check?(:white)
             puts"check!"
-            # break
+            if board.checkmate?(:black) || board.checkmate?(:white)
+              puts "checkmate bitches"
+            end
           end
         rescue InvalidMoveError => e
           puts e.message
