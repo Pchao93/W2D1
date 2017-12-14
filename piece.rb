@@ -38,13 +38,13 @@ class Piece
         until row < 0
           if @board[[row,col]].symbol != :null
             if @board[[row,col]].color != color
-              moves_array << [row, col]
+              moves_array << [row, col] unless row.nil? || col.nil?
               break
             else
               break
             end
           end
-          moves_array << [row,col]
+          moves_array << [row,col] unless row.nil? || col.nil?
           row -= 1
         end
         # downwards row increases, column stays the same
@@ -53,13 +53,13 @@ class Piece
           # debugger
           if @board[[row, col]].symbol != :null
             if @board[[row, col]].color != color
-              moves_array << [row, col]
+              moves_array << [row, col] unless row.nil? || col.nil?
               break
             else
               break
             end
           end
-          moves_array << [row,col]
+          moves_array << [row,col] unless row.nil? || col.nil?
           row += 1
         end
         # left row stays the same, column decreases
@@ -67,13 +67,13 @@ class Piece
         until col < 0
           if @board[[row,col]].symbol != :null
             if @board[[row,col]].color != color
-              moves_array << [row, col]
+              moves_array << [row, col] unless row.nil? || col.nil?
               break
             else
               break
             end
           end
-          moves_array << [row,col]
+          moves_array << [row,col] unless row.nil? || col.nil?
           col -= 1
         end
         # right row stays the same, column increases
@@ -87,7 +87,7 @@ class Piece
               break
             end
           end
-          moves_array << [row,col]
+          moves_array << [row,col] unless row.nil? || col.nil?
           col += 1
         end
       end
@@ -96,95 +96,95 @@ class Piece
         until row > 7 || col > 7
           if @board[[row,col]].symbol != :null
             if @board[[row,col]].color != color
-              moves_array << [row, col]
+              moves_array << [row, col] unless row.nil? || col.nil?
               break
             else
               break
             end
           end
-          moves_array << [row,col]
+          moves_array << [row,col] unless row.nil? || col.nil?
           row,col = row + 1, col + 1
         end
         row, col = start_row - 1, start_col - 1
         until row < 0 || col < 0
           if @board[[row,col]].symbol != :null
             if @board[[row,col]].color != color
-              moves_array << [row, col]
+              moves_array << [row, col] unless row.nil? || col.nil?
               break
             else
               break
             end
           end
-          moves_array << [row,col]
+          moves_array << [row,col] unless row.nil? || col.nil?
           row,col = row - 1, col - 1
         end
         row, col = start_row + 1, start_col - 1
         until row > 7 || col < 0
           if @board[[row,col]].symbol != :null
             if @board[[row,col]].color != color
-              moves_array << [row, col]
+              moves_array << [row, col] unless row.nil? || col.nil?
               break
             else
               break
             end
           end
-          moves_array << [row,col]
+          moves_array << [row,col] unless row.nil? || col.nil?
           row,col = row + 1, col - 1
         end
         row, col = start_row - 1, start_col + 1
         until row < 0 || col > 7
           if @board[[row,col]].symbol != :null
             if @board[[row,col]].color != color
-              moves_array << [row, col]
+              moves_array << [row, col] unless row.nil? || col.nil?
               break
             else
               break
             end
           end
-          moves_array << [row,col]
+          moves_array << [row,col] unless row.nil? || col.nil?
           row,col = row - 1, col + 1
         end
       end
-      # p moves_array
+      # debugger
       @moves = moves_array
     end
 
-    # def valid_moves
-    #   # p "blarglefargle"
-    #   dup_board = @board.dup
-    #   # p dup_board
-    #   valid_moves_array = []
-    #
-    #   i = 0
-    #   while i < @moves.compact.length
-    #     if @moves[i].nil?
-    #       i += 1
-    #       next
-    #     end
-    #     old_thing_at_new_spot = dup_board[@moves[i]]
-    #
-    #     dup_board.move_piece!(self.pos, @moves[i])
-    #     if !dup_board.in_check?(color)
-    #
-    #       valid_moves_array << @moves[i]
-    #
-    #       dup_board.move_piece!(@moves[i], self.pos)
-    #
-    #       dup_board[@moves[i]] = old_thing_at_new_spot
-    #       self.update_pos(self.pos)
-    #
-    #
-    #
-    #     else
-    #
-    #     end
-    #     i += 1
-    #   end
-    #
-    #   # p "BLARGEESDF"
-    #   return valid_moves_array
-    #
-    # end
+    def valid_moves
+      # p "blarglefargle"
+      dup_board = @board.dup
+      # p dup_board
+      valid_moves_array = []
+
+      i = 0
+      while i < @moves.compact.length
+        if @moves[i].nil?
+          i += 1
+          next
+        end
+        old_thing_at_new_spot = dup_board[@moves[i]]
+
+        dup_board.move_piece!(self.pos, @moves[i])
+        if !dup_board.in_check?(color)
+
+          valid_moves_array << @moves[i]
+
+          dup_board.move_piece!(@moves[i], self.pos)
+
+          dup_board[@moves[i]] = old_thing_at_new_spot
+          self.update_pos(self.pos)
+
+
+
+        else
+
+        end
+        i += 1
+      end
+
+      # p "BLARGEESDF"
+      return valid_moves_array
+
+    end
 
   end
 
@@ -196,7 +196,7 @@ class Piece
       move_proc = Proc.new do |offset|
         row = start_row + offset[0]
         col = start_col + offset[1]
-        moves_array << [row,col] unless !@board.in_bounds?([row,col]) || @board[[row, col]].color == color
+        [row,col] unless row.nil? || col.nil? || !@board.in_bounds?([row,col]) || @board[[row, col]].color == color
       end
       if symbol == :knight
         offsets = [
@@ -240,12 +240,12 @@ class Piece
           if start_row == 6
             row = start_row - 2
             col = start_col
-            moves_array << [row, col] unless !@board.in_bounds?([row,col]) ||
-                @board[[row, col]].color == color
+            moves_array << [row, col] unless row.nil? || col.nil? || !@board.in_bounds?([row,col]) ||
+                @board[[row, col]] != NullPiece.instance
           end
           col = start_col
           row = start_row - 1
-          moves_array << [row, col] unless !@board.in_bounds?([row,col]) ||
+          moves_array << [row, col] unless row.nil? || col.nil? || !@board.in_bounds?([row,col]) ||
             @board[[row, col]] != NullPiece.instance
         else
           if !@board[[start_row + 1, start_col + 1]].nil? &&
@@ -261,12 +261,12 @@ class Piece
           if start_row == 1
             row = start_row + 2
             col = start_col
-            moves_array << [row, col] unless !@board.in_bounds?([row,col]) ||
-              @board[[row, col]].color == color
+            moves_array << [row, col] unless row.nil? || col.nil? || !@board.in_bounds?([row,col]) ||
+              @board[[row, col]] != NullPiece.instance
           end
           col = start_col
           row = start_row + 1
-          moves_array << [row, col] unless !@board.in_bounds?([row,col]) ||
+          moves_array << [row, col] unless row.nil? || col.nil? || !@board.in_bounds?([row,col]) ||
             @board[[row, col]] != NullPiece.instance
         end
       end
@@ -276,42 +276,41 @@ class Piece
     end
   end
 
-  # def valid_moves
-  #   # p "blarglefargle"
-  #   dup_board = @board.dup
-  #   # p dup_board
-  #   valid_moves_array = []
-  #
-  #   i = 0
-  #   while i < @moves.compact.length
-  #     if @moves[i].nil?
-  #       i += 1
-  #       next
-  #     end
-  #     old_thing_at_new_spot = dup_board[@moves[i]]
-  #
-  #     dup_board.move_piece!(self.pos, @moves[i])
-  #     if !dup_board.in_check?(color)
-  #
-  #       valid_moves_array << @moves[i]
-  #
-  #       dup_board.move_piece!(@moves[i], self.pos)
-  #
-  #       dup_board[@moves[i]] = old_thing_at_new_spot
-  #       self.update_pos(self.pos)
-  #
-  #
-  #
-  #     else
-  #
-  #     end
-  #     i += 1
-  #   end
-  #
-  #   # p "BLARGEESDF"
-  #   return valid_moves_array
-  #
-  # end
+  def valid_moves
+    # p "blarglefargle"
+    dup_board = @board.dup
+    # p dup_board
+    valid_moves_array = []
+    i = 0
+    while i < @moves.length
+      if @moves[i].nil?
+        i += 1
+        next
+      end
+      old_thing_at_new_spot = dup_board[@moves[i]]
+
+      dup_board.move_piece!(self.pos, @moves[i])
+      if !dup_board.in_check?(color)
+
+        valid_moves_array << @moves[i]
+
+        dup_board.move_piece!(@moves[i], self.pos)
+
+        dup_board[@moves[i]] = old_thing_at_new_spot
+        self.update_pos(self.pos)
+
+
+
+      else
+
+      end
+      i += 1
+    end
+
+    # p "BLARGEESDF"
+    return valid_moves_array
+
+  end
 
 end
 

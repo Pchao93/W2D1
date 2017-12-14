@@ -12,7 +12,22 @@ class Board
     [0,0] => "rook"
   }
   attr_accessor :start_square, :destination_square
-  def initialize
+  def initialize(grid = default_grid)
+    @grid = grid
+    @start_square = nil
+    @destination_square = nil
+  end
+
+  def self.empty_grid
+    Array.new(8) { Array.new(8, NullPiece.instance) }
+  end
+
+  def setup
+    @grid = default_grid
+
+  end
+
+  def default_grid
     @grid = Board.empty_grid
     @grid[1][0] = Pawn.new([1, 0], self, :black)
     @grid[1][1] = Pawn.new([1, 1], self, :black)
@@ -47,55 +62,7 @@ class Board
     @grid[0][5] = Bishop.new([0, 5], self, :black)
     @grid[7][2] = Bishop.new([7, 2], self, :white)
     @grid[7][5] = Bishop.new([7, 5], self, :white)
-    @start_square = nil
-    @destination_square = nil
-  end
-
-  def self.empty_grid
-    Array.new(8) { Array.new(8, NullPiece.instance) }
-  end
-
-  def setup
-    @grid = default_grid
-
-  end
-
-  def default_grid
-    grid = Board.empty_grid
-    grid[1][0] = Pawn.new([1, 0], self, :black)
-    grid[1][1] = Pawn.new([1, 1], self, :black)
-    grid[1][2] = Pawn.new([1, 2], self, :black)
-    grid[1][3] = Pawn.new([1, 3], self, :black)
-    grid[1][4] = Pawn.new([1, 4], self, :black)
-    grid[1][5] = Pawn.new([1, 5], self, :black)
-    grid[1][6] = Pawn.new([1, 6], self, :black)
-    grid[1][7] = Pawn.new([1, 7], self, :black)
-    grid[6][0] = Pawn.new([6, 0], self, :white)
-    grid[6][1] = Pawn.new([6, 1], self, :white)
-    grid[6][2] = Pawn.new([6, 2], self, :white)
-    grid[6][3] = Pawn.new([6, 3], self, :white)
-    grid[6][4] = Pawn.new([6, 4], self, :white)
-    grid[6][5] = Pawn.new([6, 5], self, :white)
-    grid[6][6] = Pawn.new([6, 6], self, :white)
-    grid[6][7] = Pawn.new([6, 7], self, :white)
-    grid[0][7] = King.new([0, 7], self, :white)
-    grid[0][4] = King.new([0, 4], self, :black)
-    grid[7][4] = King.new([7, 4], self, :white)
-    grid[0][3] = Queen.new([0, 3], self, :black)
-    grid[7][3] = Queen.new([7, 3], self, :white)
-    grid[0][1] = Knight.new([0, 1], self, :black)
-    grid[0][6] = Knight.new([0, 6], self, :black)
-    grid[7][1] = Knight.new([7, 1], self, :white)
-    grid[7][6] = Knight.new([7, 6], self, :white)
-    grid[0][0] = Rook.new([0, 0], self, :black)
-    grid[0][7] = Rook.new([0, 7], self, :black)
-    grid[7][7] = Rook.new([7, 7], self, :white)
-    grid[7][0] = Rook.new([7, 0], self, :white)
-    grid[0][2] = Bishop.new([0, 2], self, :black)
-    grid[0][5] = Bishop.new([0, 5], self, :black)
-    grid[7][2] = Bishop.new([7, 2], self, :white)
-    grid[7][5] = Bishop.new([7, 5], self, :white)
-    grid
+    @grid
   end
 
   def in_bounds?(pos)
@@ -113,7 +80,7 @@ class Board
     end
 
 
-    if piece.moves.include?(end_pos)
+    if piece.valid_moves.include?(end_pos)
 
       # p [self[end_pos], self[start_pos]]
       self[end_pos] = piece
@@ -131,14 +98,14 @@ class Board
     @destination_square = nil
   end
 
-  # def move_piece!(start_pos, end_pos)
-  #   piece = self[start_pos]
-  #
-  #
-  #   self[end_pos] = piece
-  #   self[start_pos] = NullPiece.instance
-  #
-  # end
+  def move_piece!(start_pos, end_pos)
+    piece = self[start_pos]
+
+
+    self[end_pos] = piece
+    self[start_pos] = NullPiece.instance
+
+  end
 
   def [](pos)
     row, col = pos
@@ -232,16 +199,23 @@ class Board
 
   end
 
-  # def checkmate?(color)
-  #   if in_check?(color)
-  #     valid_moves = []
-  #     self.each_piece do |piece|
-  #       valid_moves = piece.valid_moves
-  #     end
-  #     return valid_moves.empty?
-  #   end
-  #   false
-  # end
+  def checkmate?(color)
+    if in_check?(color)
+      valid_moves_array = []
+      pieces_that_could_move = []
+      self.each_piece do |piece|
+        if piece.color == color
+          valid_moves_array += piece.valid_moves
+          pieces_that_could_move << [piece.symbol, piece.color] unless piece.valid_moves.empty?
+        end
+      end
+      p color
+      p valid_moves_array
+      p pieces_that_could_move
+      return valid_moves_array.empty?
+    end
+    false
+  end
 
 
 end

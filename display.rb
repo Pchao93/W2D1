@@ -99,17 +99,18 @@ class Display
 
   def test_display
     until false
-      system("clear")
+      # system("clear")
 
       if board.start_square && board.destination_square
         begin
           board.move_piece(board.start_square, board.destination_square)
           if board.in_check?(:black) || board.in_check?(:white)
             puts"check!"
-          #   # if board.checkmate?(:black) || board.checkmate?(:white)
-          #   #   puts "checkmate bitches"
-          #   # end
-            break
+            if board.checkmate?(:black) || board.checkmate?(:white)
+              puts "checkmate bitches"
+              break
+            end
+            sleep(2)
           end
         rescue InvalidMoveError => e
           puts e.message
